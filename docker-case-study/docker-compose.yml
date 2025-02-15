@@ -1,0 +1,60 @@
+version: "3.8"
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    restart: always
+    networks:
+      - app_network
+    depends_on:
+      database:
+        condition: service_healthy  # Waits for DB to be ready
+    environment:
+      DB_HOST: database
+      DB_USER: root
+      DB_PASSWORD: rootpass
+      DB_NAME: ecommerce
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    restart: always
+    networks:
+      - app_network
+    depends_on:
+      - backend
+
+  database:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: ecommerce
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 5
+      start_period: 20s
+
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+    restart: always
+    networks:
+      - app_network
+    depends_on:
+      - frontend
+
+networks:
+  app_network:
+
+volumes:
+  db_data:
