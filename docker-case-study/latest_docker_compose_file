@@ -1,0 +1,40 @@
+version: "3.8"
+services:
+  backend:
+    image: docker6767/backend:latest
+    networks:
+      - aksith_stack_new_network
+    ports:
+      - "5000:5000"  # Explicitly exposing backend service
+
+  frontend:
+    image: docker6767/frontend:latest
+    networks:
+      - aksith_stack_new_network
+    ports:
+      - "3000:3000"  # Explicitly exposing frontend service
+
+  database:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: ecommerce
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - aksith_stack_new_network
+    ports:
+      - "3306:3306"  # Exposing MySQL port (if needed externally)
+
+  nginx:
+    image: docker6767/nginx:latest
+    ports:
+      - "80:80"  # Already mapped, no changes needed
+    networks:
+      - aksith_stack_new_network
+
+networks:
+  aksith_stack_new_network:
+
+volumes:
+  db_data:
